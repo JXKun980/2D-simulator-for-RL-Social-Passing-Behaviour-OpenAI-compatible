@@ -1,0 +1,1 @@
+{"epsilon_decay": 0.999915, "current_epoch": 0, "network_inputs": 15, "network_outputs": 4, "memorySize": 10000000, "epochs": 50000, "network_structure": [150, 100, 100], "discountFactor": 0.99, "steps": 500, "learnStart": 64, "learningRate": 0.0001, "explorationRate": 1, "updateTargetNetwork": 2000, "minibatch_size": 128}
