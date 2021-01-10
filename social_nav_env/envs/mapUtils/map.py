@@ -39,6 +39,7 @@ class Map:
         pygame.display.set_caption('2D Training')
         self.clock = pygame.time.Clock()
 
+    def reset(self):
         # Generate map specific data
         if map_type == MapType.COMPLEX:
             raise NotImplementedError
