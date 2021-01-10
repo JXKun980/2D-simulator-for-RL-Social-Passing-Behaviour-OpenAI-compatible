@@ -36,6 +36,7 @@ class Map:
         self.surface = pygame.display.set_mode((width, height))
         pygame.display.set_caption('2D Training')
 
+    def reset(self):
         # Generate map specific data
         if map_type == MapType.COMPLEX:
             raise NotImplementedError

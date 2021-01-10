@@ -37,10 +37,10 @@ map_type = ""
 # AImode
 # 0: Fresh training
 # 1: Continue training from resume_epoch
-# 2: Start fresh training but load weights from resume_training_name
+# 2: Start fresh training but load weights from loaded_training_name
 # 3: Run AI for evaluation
 
-AImode = 2
+AImode = 1
 
 # training_name = '2D_3Agent_twoRooms_noCollide'
 # resume_epoch = '1144' # change to epoch to continue from
@@ -58,13 +58,14 @@ AImode = 2
 # resume_epoch = '1363' # change to epoch to continue from11
 
 training_name = 'My_Training_2_Agents_with_1_box'
-resume_epoch = '49168'
+resume_epoch = '1153'
 
-resume_training_name = '2D_1Agent_social_corridor_Social_narrow'
+loaded_training_name = '2D_1Agent_social_corridor_Social_narrow'
+
 saveRate = 10000 #Saves the weights and parameters every x epochs
 
 # Performance Check?
-performaceCheck = True
+performaceCheck = False
 numberOfEpochsToTest = 10
 testingInterval = 200
 startTesting = 1000
@@ -160,7 +161,7 @@ elif AImode == 1:
 elif AImode == 2:
     #fresh training but with old weights
     params_json  = os.path.dirname(os.path.abspath(__file__)) + '/training_results/dqn_ep0.json'
-    weights_path = os.path.dirname(os.path.abspath(__file__)) + '/training_results/' + resume_training_name + '_ep' + resume_epoch + '.h5'
+    weights_path = os.path.dirname(os.path.abspath(__file__)) + '/training_results/' + loaded_training_name + '_ep' + resume_epoch + '.h5'
 
     dataUtils.create_csv(reward_file)
     if performaceCheck:
@@ -234,6 +235,8 @@ for i in range(numberOfAgents):
     blacklist.extend(goals)
     goals.append({'position':[100,100], 'size':100})
     dispUtils.noCollideSpawn(windowSurface,goals[-1],blacklist,200)
+
+    # If the agent does not have a sight of a wide enough path to walk though to goal, then plan path
     if dispUtils.corridorOfSight(windowSurface,robots[-1],goals[-1],55,65)==False:
         pathdata[i] = planner.planPath(windowSurface,robots[i],goals[i])
         subgoalIndex.append(len(pathdata[i][1])-1)
