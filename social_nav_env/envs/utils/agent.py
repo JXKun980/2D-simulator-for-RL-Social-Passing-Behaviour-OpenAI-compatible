@@ -97,7 +97,7 @@ class Agent(object):
 
     def set_velocity(self, velocity):
         self.vx = velocity[0]
-        self.vy = velocity[1]11
+        self.vy = velocity[1]
 
     @abc.abstractmethod
     def act(self, ob):

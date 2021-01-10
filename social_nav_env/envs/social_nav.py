@@ -9,7 +9,7 @@ from numpy.linalg import norm
 from .utils.human import Human
 from .utils.info import *
 from .utils.utils import point_to_segment_dist
-from .mapUtils.map import Map
+from .mapUtils.map import Map, MapType
 
 
 class SocialNav(gym.Env):
@@ -49,12 +49,24 @@ class SocialNav(gym.Env):
         self.states = None
         self.action_values = None
         self.attention_weights = None
+
+        # environment properties
+        self.no_of_agents = 2
+        self.no_of_boxes = 1
+        self.goals_per_epoch = 1
+        self.map = None
+
         # laser scan properties
         self.scan_colour = None
         self.scan_num_lasers = None
         self.scan_ang_range = None
         self.scan_dist_range = None
         self.scan_num_dist_checks = None
+
+        # pygame simulation properties
+        self.updatesPerSecond = 1
+        self.realTimeFactor = 10
+
 
     def configure(self, config):
         self.config = config

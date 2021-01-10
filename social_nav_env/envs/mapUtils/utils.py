@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 class Shape(ABC):
-    def __init__(self, pos):
+    def __init__(self, pos, color=None):
         self.x = pos[0]
         self.y = pos[1]
     

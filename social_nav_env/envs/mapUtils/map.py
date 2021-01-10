@@ -8,8 +8,9 @@ from .utils import CornerRect, CentreRect
 
 class MapType(Enum):
     DEFAULT = 0
-    TWO_ROOMS = 1
-    COMPLEX = 2
+    EMPTY = 1
+    TWO_ROOMS = 2
+    COMPLEX = 3
 
 '''
 A convenient wrapper for the pygame module that allow easy drawing and information retrieving
@@ -21,20 +22,22 @@ class Map:
     def __init__(self, width, height, map_type, obstacle_colors=[]):
         # Class instance variables
         self.goal_size = 100
-        self.polygons = None
-        self.map_fill = None
-        self.map_element_fill = None
+        self.map_polygons = None
+        self.background_color = None
+        self.element_color = None
         self.width = width
         self.height = height
         self.obstacle_colors = obstacle_colors + self.WALL_COLOR
         self.agent_rects = {} # dict
         self.goal_rects = {}
         self.wall_rects = []
+        self.clock = None
 
         # Set up
         pygame.init()
         self.surface = pygame.display.set_mode((width, height))
         pygame.display.set_caption('2D Training')
+        self.clock = pygame.time.Clock()
 
         # Generate map specific data
         if map_type == MapType.COMPLEX:
@@ -43,18 +46,18 @@ class Map:
             # self.map_fill = self.WALL_COLOR
             # self.map_element_fill = self.GROUND_COLOR
         elif map_type == MapType.TWO_ROOMS:
-            self.polygons = self.map_generation_two_rooms()
-            self.map_fill = self.GROUND_COLOR
-            self.map_element_fill = self.WALL_COLOR
+            self.map_polygons = self.map_generation_two_rooms()
+            self.background_color = self.GROUND_COLOR
+            self.element_color = self.WALL_COLOR
         else:
-            self.polygons =[]
-            self.map_fill = self.GROUND_COLOR
-            self.map_element_fill = self.WALL_COLOR
+            self.map_polygons = []
+            self.background_color = self.GROUND_COLOR
+            self.element_color = self.WALL_COLOR
 
         # Put map data into pygame
-        self.surface.fill(self.map_fill)
-        for polygon in self.polygons:
-            rect = pygame.draw.polygon(self.surface, self.map_element_fill, polygon)
+        self.surface.fill(self.background_color) # Reset canvas
+        for polygon in self.map_polygons:
+            rect = pygame.draw.polygon(self.surface, self.element_color, polygon)
             self.wall_rects.append(rect)
 
     def map_generation_two_rooms(self):
@@ -69,17 +72,13 @@ class Map:
         walls.append(CornerRect((wall_pos_x, gap_y + gap_height), wall_width, self.height - gap_height - gap_y).to_poly())
         return walls
 
-    def createWalls(self, boxSize, wallWidth):
-        topCorner = [int(((self.width - boxSize)/2) - wallWidth), int(((self.height - boxSize)/2) - wallWidth)]
-        leftCorner = [int(((self.width - boxSize)/2) - wallWidth), int(((self.height + boxSize)/2))]
-        rightCorner = [int(((self.width + boxSize)/2)), int(((self.height - boxSize)/2) - wallWidth)]
+    def create_borders(self, border_width):
+        top_wall = CornerRect((0, self.height-border_width), self.width, border_width)
+        bot_wall = CornerRect((0, 0), self.width, border_width)
+        lef_wall = CornerRect((0, border_width), border_width, self.height-(border_width*2))
+        rig_wall = CornerRect((self.width-border_width, border_width), border_width, self.height-(border_width*2))
 
-        topWall = CornerRect(topCorner, boxSize+(wallWidth*2), wallWidth)
-        leftWall = CornerRect(topCorner, wallWidth, boxSize+(wallWidth*2))
-        rightWall = CornerRect(rightCorner, wallWidth, boxSize+(wallWidth*2))
-        bottomWall = CornerRect(leftCorner, boxSize+(wallWidth*2), wallWidth)
-
-        walls = [topWall.to_poly(), leftWall.to_poly(), rightWall.to_poly(), bottomWall.to_poly()]
+        walls = [top_wall.to_poly(), bot_wall.to_poly(), lef_wall.to_poly(), rig_wall.to_poly()]
         return walls
 
     def draw_agent(self, agent, agent_color):
