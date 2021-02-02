@@ -19,7 +19,7 @@ class Agent(object):
         self.radius = config.getfloat(section, 'radius')
         self.goal_radius = config.getfloat(section, 'goal_radius')
         self.policy = policy_factory[config.get(section, 'policy')]()
-        self.sensor = config.get(section, 'sensor')
+        self.sensors = config.get(section, 'sensors')
         self.kinematics = self.policy.kinematics if self.policy is not None else None
         self.px = None
         self.py = None

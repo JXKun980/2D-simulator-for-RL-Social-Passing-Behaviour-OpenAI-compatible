@@ -4,7 +4,7 @@ from pygame import Color
 from collections import namedtuple
 import math
 import random
-from .utils import CornerRect, CentreRect
+from .shape import CornerRect, CentreRect
 
 class MapType(Enum):
     DEFAULT = 0
@@ -32,6 +32,7 @@ class Map:
         self.goal_rects = {}
         self.wall_rects = []
         self.clock = None
+        self.map_type = map_type
 
         # Set up
         pygame.init()
@@ -41,12 +42,12 @@ class Map:
 
     def reset(self):
         # Generate map specific data
-        if map_type == MapType.COMPLEX:
+        if self.map_type == MapType.COMPLEX:
             raise NotImplementedError
             # self.polygons = mapGeneration_complex()
             # self.map_fill = self.WALL_COLOR
             # self.map_element_fill = self.GROUND_COLOR
-        elif map_type == MapType.TWO_ROOMS:
+        elif self.map_type == MapType.TWO_ROOMS:
             self.map_polygons = self.map_generation_two_rooms()
             self.background_color = self.GROUND_COLOR
             self.element_color = self.WALL_COLOR
@@ -55,7 +56,7 @@ class Map:
             self.background_color = self.GROUND_COLOR
             self.element_color = self.WALL_COLOR
 
-        # Put map data into pygame
+        # Put map data into pygame, and store rectangle handles
         self.surface.fill(self.background_color) # Reset canvas
         for polygon in self.map_polygons:
             rect = pygame.draw.polygon(self.surface, self.element_color, polygon)
@@ -81,6 +82,7 @@ class Map:
 
         walls = [top_wall.to_poly(), bot_wall.to_poly(), lef_wall.to_poly(), rig_wall.to_poly()]
         return walls
+
 
     def draw_agent(self, agent, agent_color):
         # Draw a circle and a line representing the heading

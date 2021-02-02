@@ -40,7 +40,7 @@ map_type = ""
 # 2: Start fresh training but load weights from loaded_training_name
 # 3: Run AI for evaluation
 
-AImode = 1
+AImode = 3
 
 # training_name = '2D_3Agent_twoRooms_noCollide'
 # resume_epoch = '1144' # change to epoch to continue from
@@ -58,7 +58,7 @@ AImode = 1
 # resume_epoch = '1363' # change to epoch to continue from11
 
 training_name = 'My_Training_2_Agents_with_1_box'
-resume_epoch = '1153'
+resume_epoch = '2628'
 
 loaded_training_name = '2D_1Agent_social_corridor_Social_narrow'
 

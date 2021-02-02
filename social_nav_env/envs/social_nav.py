@@ -4,6 +4,7 @@ import matplotlib.lines as mlines
 import numpy as np
 import rvo2
 import math
+from enum import Enum
 from matplotlib import patches
 from numpy.linalg import norm
 from .utils.human import Human
@@ -11,6 +12,10 @@ from .utils.info import *
 from .utils.utils import point_to_segment_dist
 from .mapUtils.map import Map, MapType
 
+class PhaseType(Enum):
+    TRAIN = 0
+    VALIDATION = 1
+    TEST = 2
 
 class SocialNav(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -274,33 +279,42 @@ class SocialNav(gym.Env):
         del sim
         return self.human_times
 
-    def reset(self, phase='test', test_case=None):
+    def reset(self, phase, test_case=None):
         """
         Set px, py, gx, gy, vx, vy, theta for robot and humans
         :return:
         """
         if self.robot is None:
             raise AttributeError('robot has to be set!')
-        assert phase in ['train', 'val', 'test']
+
+        self.map.reset()
+        # Spawn boxes TODO
+
         if test_case is not None:
             self.case_counter[phase] = test_case
+
         self.global_time = 0
+
         if phase == 'test':
             self.human_times = [0] * self.human_num
         else:
             self.human_times = [0] * (self.human_num if self.robot.policy.multiagent_training else 1)
+        
         if not self.robot.policy.multiagent_training:
             self.train_val_sim = 'circle_crossing'
 
         if self.config.get('humans', 'policy') == 'trajnet':
             raise NotImplementedError
         else:
-            counter_offset = {'train': self.case_capacity['val'] + self.case_capacity['test'],
-                              'val': 0, 'test': self.case_capacity['val']}
+            counter_offset = {'validation': 0, 
+                              'test': self.case_capacity['val'],
+                              'train': self.case_capacity['val'] + self.case_capacity['test']}
+
             self.robot.set(0, -self.circle_radius, 0, self.circle_radius, 0, 0, np.pi / 2)
+            
             if self.case_counter[phase] >= 0:
                 np.random.seed(counter_offset[phase] + self.case_counter[phase])
-                if phase in ['train', 'val']:
+                if phase in ['train', 'validation']:
                     human_num = self.human_num if self.robot.policy.multiagent_training else 1
                     self.generate_random_human_position(human_num=human_num, rule=self.train_val_sim)
                 else:
@@ -323,16 +337,21 @@ class SocialNav(gym.Env):
             agent.time_step = self.time_step
             agent.policy.time_step = self.time_step
 
-        self.states = list()
+        self.states = []
         if hasattr(self.robot.policy, 'action_values'):
-            self.action_values = list()
+            self.action_values = []
         if hasattr(self.robot.policy, 'get_attention_weights'):
-            self.attention_weights = list()
+            self.attention_weights = []
 
-        # get current observation
-        if self.robot.sensor == 'coordinates':
+        # get obstacle observation
+        ob = []
+        if '2D Lidar' in self.robot.sensors:
+            ob.append(self.laser_scan(self.robot))
+        
+        # get human observation
+        if 'human coordinates' in self.robot.sensors:
             ob = [human.get_observable_state() for human in self.humans]
-        elif self.robot.sensor == 'RGB':
+        elif 'RGB' in self.robot.sensors:
             raise NotImplementedError
 
         return ob
@@ -655,5 +674,4 @@ class SocialNav(gym.Env):
             laser_scan_data.append(round(scan_reach/100, 1))
         return laser_scan_data
 
-    def random_spawn_agent_and_goal(self):
         
